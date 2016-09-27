@@ -6,6 +6,9 @@
 #include "realtime_chart.hpp"
 #include "chart_trader.hpp"
 
+#include <iostream>
+
+
 static const float MIN_CHART_VALUE = 0;
 static const float MAX_CHART_VALUE = 10;
 static const float CHART_IN_SECONDS = 60.0f;
@@ -130,6 +133,8 @@ public:
 			{
 				mTrader->short_order().leave();
 			}
+
+			std::cout << "New capital: " << mTrader->capital() << std::endl;
 		} else if(!mTrader->is_trading())
 		{
 			if(key == sf::Keyboard::Up)
