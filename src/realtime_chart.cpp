@@ -1,4 +1,5 @@
 #include <cassert>
+#include <algorithm>
 #include "realtime_chart.hpp"
 
 

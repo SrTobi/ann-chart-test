@@ -1,5 +1,7 @@
 #include <chrono>
 #include <cassert>
+#include <cmath>
+#include <algorithm>
 #include "chart_model.hpp"
 
 

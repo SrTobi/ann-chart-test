@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <random>
+#include <memory>
 #include "chart_data.hpp"
 
 class ChartModel
