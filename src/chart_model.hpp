@@ -21,7 +21,12 @@ public:
 	void generate();
 	void generate(unsigned int seed);
 
+	//float max_yield() const;
+
 private:
+	void calc_max_yield();
+private:
+	std::unique_ptr<float> mMaxYield;
 	std::vector<float> mChartValues;
 	float mVolatility;
 	float mMinValue;

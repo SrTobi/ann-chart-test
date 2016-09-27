@@ -69,4 +69,16 @@ void ChartModel::generate(unsigned int seed)
 		delta_distribution = distribution_type(min, max);
 		cur_value += rel_rand();
 	}
+
+	calc_max_yield();
+}
+
+/*float ChartModel::max_yield() const
+{
+	return *mMaxYield;
+}*/
+
+void ChartModel::calc_max_yield()
+{
+
 }
