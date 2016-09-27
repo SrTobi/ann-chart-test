@@ -24,7 +24,7 @@ void Order::breach()
 
 	assert(mEntrance >= 0.0f);
 
-	mTrader->mCapital -= mEntrance;
+	//mTrader->mCapital -= mEntrance;
 	mTrader->mCapital -= mChargeFunction(mEntrance);
 	mActive = true;
 }
