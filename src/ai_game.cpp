@@ -26,7 +26,7 @@ typedef ANN<3, 4> MyANN;
 
 static const float MIN_CHART_VALUE = 0;
 static const float MAX_CHART_VALUE = 10;
-static const float CHART_IN_SECONDS = 60.0f;
+static const float CHART_IN_SECONDS = 20.0f;
 static const float TICKS_PER_SECOND = 30.0f;
 static const float CHART_VOLATILITY = 0.24f;
 
