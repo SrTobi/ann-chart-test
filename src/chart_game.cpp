@@ -13,10 +13,10 @@ static const float TICKS_PER_SECOND = 30.0f;
 static const float CHART_VOLATILITY = 0.24f;
 
 
-class ChartAdapter: public ChartData
+class GameChartAdapter: public ChartData
 {
 public:
-	ChartAdapter(RealtimeChart* model)
+	GameChartAdapter(RealtimeChart* model)
 		: mModel(model)
 	{
 	}
@@ -65,7 +65,7 @@ public:
 	{
 		mChartModel.reset(new ChartModel(MIN_CHART_VALUE, MAX_CHART_VALUE, 0.25f, std::size_t(CHART_IN_SECONDS * TICKS_PER_SECOND)));
 		mChart.reset(new RealtimeChart(mChartModel.get(), TICKS_PER_SECOND));
-		mChartAdapter.reset(new ChartAdapter(mChart.get()));
+		mChartAdapter.reset(new GameChartAdapter(mChart.get()));
 		mChartRenderer.reset(new ChartRenderer(mChartAdapter.get(), sf::FloatRect()));
 
 		mTrader.reset(new ChartTrader(mChart.get(), 0.0f));
@@ -153,7 +153,7 @@ public:
 
 	}
 private:
-	std::unique_ptr<ChartAdapter> mChartAdapter;
+	std::unique_ptr<GameChartAdapter> mChartAdapter;
 	std::unique_ptr<ChartRenderer> mChartRenderer;
 	std::unique_ptr<ChartModel> mChartModel;
 	std::unique_ptr<RealtimeChart> mChart;
