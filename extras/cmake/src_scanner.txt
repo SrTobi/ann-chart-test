@@ -1,0 +1,23 @@
+
+function(SCAN_SOURCE_HERE _out _endings)
+	
+	foreach(ending ${_endings})
+		file(GLOB_RECURSE found_files "*.${ending}")
+		
+		set(out ${out} ${found_files})
+	endforeach()
+	set(${_out} ${${_out}} ${out} PARENT_SCOPE)
+endfunction()
+
+macro(AUTO_SOURCE_GROUP _files)
+	foreach(f ${_files})
+		if(f)
+			string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" striped ${f})
+			get_filename_component(pathed ${striped} PATH)
+			
+			string(REPLACE "/" "\\" group_name "${pathed}")
+			
+			source_group("${group_name}" FILES "${f}")
+		endif()
+	endforeach()
+endmacro()
