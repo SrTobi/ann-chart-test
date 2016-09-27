@@ -149,35 +149,53 @@ public:
 		float acc_fitness = std::accumulate(population.begin(), population.end(), 0.0f, [](float acc, const Entity& e){return e.fitness() + acc;});
 
 		float bounds[] = {0.0f, acc_fitness};
-		std::sort(bounds, bounds + 2);
+		std::sort(std::begin(bounds), std::end(bounds));
 
 		std::default_random_engine generator(seed);
 		std::uniform_real_distribution<float> selection_distribution(bounds[0], bounds[1]);
-		std::normal_distribution<float> normal_distribution(0.0f, 0.15f);
+		std::normal_distribution<float> normal_distribution(0.0f, 0.85f);
 		std::uniform_real_distribution<float> zeroone_distribution(0.0f, 1.0f);
 		auto selection_rand = [&]() { return selection_distribution(generator); };
 		auto normal_rand = [&]() { return normal_distribution(generator); };
 		auto zeroone_rand = [&]() { return zeroone_distribution(generator); };
-
-		while(pop_size--)
-		{
+		auto select_ann = [&]() -> const Entity& {
 			float selection = selection_rand();
-			for(auto it = population.rbegin(); it != population.rend(); ++it)
+			int i = 0;
+			for (auto it = population.rbegin(); it != population.rend(); ++it)
 			{
+				++i;
 				selection -= it->fitness();
-				if(selection <= 0)
+				if (selection <= 0)
 				{
-					const MyANN& ann = it->ann();
-					auto genoms = ann.neuron_weights().clone();
-					
-					for(auto& genom : genoms)
-						if(zeroone_rand() < 0.1f)
-							genom += normal_rand();
-
-					mEntities.push_back(Entity(std::make_shared<MyANN>(AiFormat, std::move(genoms))));
-					break;
+					return *it;
 				}
 			}
+			return population.back();
+		};
+
+		while(pop_size--)
+				{
+			auto& ent = select_ann();
+			auto genoms = ent.ann().neuron_weights().clone();
+
+			// combine
+			if (zeroone_rand() < 0.1f) {
+
+				auto& ent2 = select_ann();
+				auto part = ent2.fitness() / (ent.fitness() + ent2.fitness());
+				auto& genoms2 = ent2.ann().neuron_weights();
+				for (unsigned int i = 0; i < genoms.size(); ++i)
+					genoms[i] = (zeroone_rand() < part) ? genoms2[i] : genoms[i];
+			}
+					
+			// mutate
+			if (zeroone_rand() < 0.5) {
+				for (auto& genom : genoms)
+					if (zeroone_rand() < 0.2f)
+							genom += normal_rand();
+			}
+
+					mEntities.push_back(Entity(std::make_shared<MyANN>(AiFormat, std::move(genoms))));
 		}
 	}
 
