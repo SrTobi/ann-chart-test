@@ -20,9 +20,9 @@
 
 #define GEN_COUNT 100
 
-ANNFormat<3, 4> AiFormat(5, 2);
+ANNFormat<3, 2> AiFormat(5, 3);
 
-typedef ANN<3, 4> MyANN;
+typedef ANN<3, 2> MyANN;
 
 static const float MIN_CHART_VALUE = 0;
 static const float MAX_CHART_VALUE = 10;
@@ -57,47 +57,62 @@ public:
 	float process(ChartModel* model)
 	{
 		TickChart chart(model);
-		ChartTrader trader(&chart, 0.0f);
+		ChartTrader trader(&chart, 0.0f, [](float c) { return 0.5f; });
 
 		int short_actions = 0;
 		int long_actions = 0;
+		int profit_actions = 0;
 
 		MyANN::data_type data(AiFormat);
 
 		while(!chart.is_done())
 		{
-			data.in[0] = chart.current_value();
-			data.in[1] = trader.long_order().active()? trader.long_order().entrance() : -1.0f;
-			data.in[2] = trader.short_order().active()? trader.short_order().entrance() : -1.0f;
+			float current_value = chart.current_value();
+			float entrance;
+			data.in[0] = current_value;
+			data.in[1] = trader.long_order().active() ? 1.0f : (trader.short_order().active() ? -1.0f : 0.f);
+			data.in[2] = entrance = trader.short_order().active()? trader.short_order().entrance() : (trader.long_order().active()? trader.long_order().entrance() : 0.0f);
 
 			auto& output = mANN->process(data);
-			float long_enter = output[0];
-			float long_leave = output[1];
-			float short_enter = output[2];
-			float short_leave = output[3];
+			float do_something = output[0];
+			float enter_or_leave = output[1];
+			float short_or_long = 0.8f; // output[2];
 			
-			if(long_leave > 0.5 && trader.long_order().active())
-			{
-				long_actions++;
-				trader.long_order().leave();
-			}else if(long_enter > 0.5 && !trader.long_order().active())
-			{
-				trader.long_order().breach();
-			}
+			if (do_something >= 0.5f) {
+				if (enter_or_leave >= 0.5f) {
+					// enter
+					if (!trader.is_trading()) {
+						if (short_or_long >= 0.5f) {
+							// long
+							trader.long_order().breach();
+						}
+						else {
+							// short
+							short_actions++;
+							trader.short_order().breach();
+						}
+					}
+				}
+				else
+				{
+					// leave
+					if (trader.long_order().active())
+					{
+						long_actions++;
+						if (trader.long_order().entrance() < trader.capital())
+							profit_actions++;
+						trader.long_order().leave();
+					}
 
-			if(short_leave > 0.5 && trader.short_order().active())
-			{
-				short_actions++;
-				trader.short_order().leave();
-			}else if(short_enter > 0.5 && !trader.short_order().active())
-			{
-				trader.short_order().breach();
+					if (trader.short_order().active())
+						trader.short_order().leave();
+				}
 			}
 
 			chart.walk_tick();
 		}
 
-		mFitness = trader.capital();
+		mFitness = std::max(0.0f, trader.capital());
 		return mFitness;
 	}
 
@@ -174,7 +189,7 @@ public:
 		};
 
 		while(pop_size--)
-				{
+		{
 			auto& ent = select_ann();
 			auto genoms = ent.ann().neuron_weights().clone();
 
@@ -187,15 +202,15 @@ public:
 				for (unsigned int i = 0; i < genoms.size(); ++i)
 					genoms[i] = (zeroone_rand() < part) ? genoms2[i] : genoms[i];
 			}
-					
+
 			// mutate
 			if (zeroone_rand() < 0.5) {
 				for (auto& genom : genoms)
 					if (zeroone_rand() < 0.2f)
-							genom += normal_rand();
+						genom += normal_rand();
 			}
 
-					mEntities.push_back(Entity(std::make_shared<MyANN>(AiFormat, std::move(genoms))));
+			mEntities.push_back(Entity(std::make_shared<MyANN>(AiFormat, std::move(genoms))));
 		}
 	}
 
