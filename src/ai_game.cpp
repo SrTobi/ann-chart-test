@@ -287,7 +287,7 @@ public:
 
 	virtual float min_x() const
 	{
-		return std::max(0.0f, data_count() - 80.0f);
+		return std::max(0.0f, data_count() - 180.0f);
 	}
 
 	virtual float min_y() const
@@ -341,7 +341,7 @@ public:
 			mFitnessData.push_back(stat.avg_fitness);
 		}
 
-		while(mFitnessData.size() > 80)
+		while(mFitnessData.size() > 180)
 		{
 			mFitnessData.pop_front();
 		}
